@@ -264,49 +264,76 @@ export const RoutePointDetail = ({
       {/* Вкладка: Фото и видео */}
       {activeTab === "media" && (
         <div className="animate-fade-in">
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            {[point.image, point.image].map((src, i) => (
+
+          {/* Главное фото */}
+          <button
+            onClick={() => setLightboxImg(point.image)}
+            className="relative w-full overflow-hidden rounded-xl border group cursor-zoom-in mb-3"
+            style={{ borderColor: "#e3c07f" }}
+          >
+            <img src={point.image} alt={point.title} className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(44,26,14,0.35)" }}>
+              <div className="flex items-center gap-2 text-white">
+                <Icon name="ZoomIn" size={20} />
+                <span className="font-montserrat text-sm">Открыть полностью</span>
+              </div>
+            </div>
+            <div className="absolute top-3 left-3 text-xs font-montserrat px-2.5 py-1 rounded-full" style={{ background: "rgba(44,26,14,0.65)", color: "white" }}>
+              Главное фото
+            </div>
+          </button>
+
+          {/* Галерея миниатюр */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {point.images.map((src, i) => (
               <button
                 key={i}
                 onClick={() => setLightboxImg(src)}
-                className="relative overflow-hidden rounded-xl border group cursor-zoom-in"
+                className="relative overflow-hidden rounded-lg border group cursor-zoom-in"
                 style={{ borderColor: "#e3c07f" }}
               >
-                <img src={src} alt="" className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-400" />
+                <img src={src} alt="" className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-400" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(44,26,14,0.4)" }}>
-                  <Icon name="ZoomIn" size={24} style={{ color: "white" }} />
+                  <Icon name="ZoomIn" size={16} style={{ color: "white" }} />
                 </div>
-                <div className="absolute bottom-2 left-2 text-xs font-montserrat px-2 py-0.5 rounded" style={{ background: "rgba(44,26,14,0.6)", color: "white" }}>
-                  Фото {i + 1}
+                <div className="absolute bottom-1.5 right-1.5 text-xs font-montserrat px-1.5 py-0.5 rounded" style={{ background: "rgba(44,26,14,0.6)", color: "white", fontSize: "10px" }}>
+                  {i + 1}/{point.images.length}
                 </div>
               </button>
             ))}
           </div>
 
-          {/* Панорама 360° заглушка */}
+          {/* Панорама 360° */}
           <div className="mb-4 p-4 rounded-xl border flex items-center gap-3" style={{ background: "rgba(253,243,227,0.7)", borderColor: "#e3c07f" }}>
             <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f7edd8", border: "1px solid #c8941a" }}>
               <Icon name="Globe" size={18} style={{ color: "#c8941a" }} />
             </div>
             <div>
               <p className="font-montserrat text-sm font-medium" style={{ color: "#2c1a0e" }}>Панорамный снимок 360°</p>
-              <p className="text-xs font-montserrat" style={{ color: "#a86e2e" }}>Загрузка панорамы...</p>
+              <p className="text-xs font-montserrat" style={{ color: "#a86e2e" }}>Виртуальный тур · скоро будет доступен</p>
             </div>
-            <span className="ml-auto text-xs font-montserrat px-3 py-1 rounded-full" style={{ background: "#e3c07f", color: "#6b4a30" }}>Скоро</span>
+            <span className="ml-auto text-xs font-montserrat px-3 py-1 rounded-full flex-shrink-0" style={{ background: "#e3c07f", color: "#6b4a30" }}>Скоро</span>
           </div>
 
           {/* Видео-рассказ */}
           <div className="relative rounded-xl border overflow-hidden cursor-pointer group" style={{ background: "#1a0f05", borderColor: "#e3c07f" }}>
-            <img src={point.image} alt="" className="w-full h-52 object-cover opacity-40 group-hover:opacity-50 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <img src={point.image} alt="" className="w-full h-56 object-cover opacity-35 group-hover:opacity-45 transition-opacity duration-300" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6">
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center border-2 transition-transform group-hover:scale-110"
-                style={{ background: "rgba(200,148,26,0.2)", borderColor: "#c8941a" }}
+                className="w-16 h-16 rounded-full flex items-center justify-center border-2 transition-transform duration-300 group-hover:scale-110"
+                style={{ background: "rgba(200,148,26,0.25)", borderColor: "#c8941a" }}
               >
                 <Icon name="Play" size={26} style={{ color: "#c8941a" }} />
               </div>
-              <p className="font-cormorant text-xl text-white font-semibold">Видео-рассказ</p>
-              <p className="text-xs font-montserrat" style={{ color: "#c8941a" }}>«{point.title}»</p>
+              <div className="text-center">
+                <p className="font-cormorant text-xl text-white font-semibold mb-1">Видео-рассказ</p>
+                <p className="text-xs font-montserrat leading-relaxed text-center max-w-xs" style={{ color: "rgba(200,148,26,0.9)" }}>
+                  {point.videoTitle}
+                </p>
+              </div>
+              <span className="text-xs font-montserrat px-3 py-1 rounded-full" style={{ background: "rgba(200,148,26,0.2)", border: "1px solid rgba(200,148,26,0.4)", color: "#e8b84b" }}>
+                Скоро доступно
+              </span>
             </div>
           </div>
         </div>
