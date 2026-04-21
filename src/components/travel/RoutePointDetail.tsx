@@ -2,6 +2,7 @@ import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { MapDotSVG } from "./CompassSVG";
 import { RoutePoint, RouteId, Route, accentColors } from "./types";
+import { MediaUpload, UserMedia } from "./MediaUpload";
 
 interface RoutePointDetailProps {
   point: RoutePoint;
@@ -151,8 +152,15 @@ export const RoutePointDetail = ({
 }: RoutePointDetailProps) => {
   const [activeTab, setActiveTab] = useState<"desc" | "media" | "audio" | "quiz">("desc");
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const [userMedia, setUserMedia] = useState<UserMedia[]>([]);
 
   const accent = accentColors[activeRoute];
+
+  const handleUploaded = (media: UserMedia) => {
+    setUserMedia(prev => [media, ...prev]);
+    setTimeout(() => setShowUpload(false), 1200);
+  };
 
   return (
     <div className="animate-fade-in max-w-3xl mx-auto">
@@ -316,7 +324,7 @@ export const RoutePointDetail = ({
           </div>
 
           {/* Видео-рассказ */}
-          <div className="relative rounded-xl border overflow-hidden cursor-pointer group" style={{ background: "#1a0f05", borderColor: "#e3c07f" }}>
+          <div className="relative rounded-xl border overflow-hidden cursor-pointer group mb-5" style={{ background: "#1a0f05", borderColor: "#e3c07f" }}>
             <img src={point.image} alt="" className="w-full h-56 object-cover opacity-35 group-hover:opacity-45 transition-opacity duration-300" />
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6">
               <div
@@ -336,7 +344,98 @@ export const RoutePointDetail = ({
               </span>
             </div>
           </div>
+
+          {/* ── Материалы участников ── */}
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#e3c07f" }}>
+            <div className="flex items-center justify-between px-4 py-3" style={{ background: "#f7edd8", borderBottom: "1px solid #e3c07f" }}>
+              <div className="flex items-center gap-2">
+                <Icon name="Users" size={15} style={{ color: accent }} />
+                <span className="font-montserrat text-sm font-semibold" style={{ color: "#2c1a0e" }}>
+                  Материалы участников
+                  {userMedia.length > 0 && (
+                    <span className="ml-2 text-xs font-normal px-1.5 py-0.5 rounded-full" style={{ background: accent, color: "white" }}>
+                      {userMedia.length}
+                    </span>
+                  )}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowUpload(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-montserrat font-medium transition-all hover:opacity-90"
+                style={{ background: accent, color: "white" }}
+              >
+                <Icon name="Plus" size={13} />
+                Добавить
+              </button>
+            </div>
+
+            {userMedia.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 py-8 px-4 text-center">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "#f0e0c0" }}>
+                  <Icon name="ImagePlus" size={18} style={{ color: "#c8941a" }} />
+                </div>
+                <p className="font-montserrat text-sm" style={{ color: "#a86e2e" }}>
+                  Поделитесь своими фото и видео с этого места
+                </p>
+                <button
+                  onClick={() => setShowUpload(true)}
+                  className="mt-1 text-xs font-montserrat font-medium underline underline-offset-2"
+                  style={{ color: accent }}
+                >
+                  Загрузить первым
+                </button>
+              </div>
+            ) : (
+              <div className="p-3 grid grid-cols-3 gap-2">
+                {userMedia.map((m, i) => (
+                  <button
+                    key={i}
+                    onClick={() => m.type === "photo" ? setLightboxImg(m.url) : undefined}
+                    className="relative overflow-hidden rounded-lg group"
+                    style={{ border: "1px solid #e3c07f" }}
+                  >
+                    {m.type === "photo" ? (
+                      <>
+                        <img src={m.url} alt="" className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(44,26,14,0.35)" }}>
+                          <Icon name="ZoomIn" size={16} style={{ color: "white" }} />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-24 flex flex-col items-center justify-center gap-1" style={{ background: "#1a0f05" }}>
+                        <Icon name="Play" size={20} style={{ color: "#c8941a" }} />
+                        <span className="text-xs font-montserrat" style={{ color: "#c8941a" }}>Видео</span>
+                      </div>
+                    )}
+                    <div className="absolute top-1.5 left-1.5">
+                      <span className="text-xs font-montserrat px-1.5 py-0.5 rounded" style={{ background: "rgba(44,26,14,0.65)", color: "white", fontSize: "9px" }}>
+                        {m.type === "photo" ? "📷" : "🎬"} Моё
+                      </span>
+                    </div>
+                  </button>
+                ))}
+                <button
+                  onClick={() => setShowUpload(true)}
+                  className="h-24 rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors hover:opacity-80"
+                  style={{ borderColor: "#d4a96a", background: "rgba(253,243,227,0.5)" }}
+                >
+                  <Icon name="Plus" size={18} style={{ color: "#c8941a" }} />
+                  <span className="text-xs font-montserrat" style={{ color: "#a86e2e" }}>Добавить</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+      )}
+
+      {/* Модальное окно загрузки */}
+      {showUpload && (
+        <MediaUpload
+          pointId={point.id}
+          accent={accent}
+          onUploaded={handleUploaded}
+          onClose={() => setShowUpload(false)}
+        />
       )}
 
       {/* Вкладка: Аудиогид */}
